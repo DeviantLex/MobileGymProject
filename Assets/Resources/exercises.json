@@ -1,0 +1,20 @@
+{
+    "exercises": [
+        { 
+            "exerciseName": "Ab-Wheel",
+            "exerciseDesciption": "The ab wheel is an advanced core exercise that targets the abs, obliques, and stabilizing muscles. Start on your knees, gripping the wheel handles firmly. Engage your core, keeping a neutral spine, and slowly roll forward, extending your body while maintaining control. Avoid arching your lower back. Roll out as far as you can while maintaining tension, then engage your abs to pull yourself back to the starting position. Start with short ranges and progress as strength improves. Proper control and core engagement are essential to prevent strain and maximize effectiveness."
+        }, 
+        {
+            "exerciseName": "Arnold-Press",
+            "exerciseDesciption": "The Arnold press is a shoulder exercise that targets all three deltoid heads for balanced development. Start seated or standing with dumbbells at shoulder height, palms facing you. As you press up, rotate your palms outward until they face forward at full extension. Lower the weights back to the starting position, reversing the motion. Maintain a controlled tempo, keep your core engaged, and avoid using momentum. This movement increases shoulder mobility and strength while reducing joint stress compared to a standard overhead press. Use a manageable weight to ensure proper form and prevent injury." 
+        },
+        { 
+            "exerciseName": "Pull-Up",
+            "exerciseDesciption": "A pull-up is an upper-body exercise that strengthens your back, arms, and core. To perform it, grip a pull-up bar with your palms facing away, hands shoulder-width apart. Hang with straight arms, engage your core, and pull yourself up until your chin clears the bar. Lower yourself slowly with control. If it’s too difficult, use assisted machines or resistance bands. Focus on form over speed to avoid injury. Pull-ups build strength, improve posture, and enhance overall fitness. Start with a few reps and gradually increase as you progress."
+        },
+        {
+            "exerciseName": "Bench-Press",
+            "exerciseDesciption": "The bench press is a fundamental upper-body exercise that targets the chest, shoulders, and triceps. Lie flat on a bench with feet planted, grip the bar slightly wider than shoulder-width, and keep wrists straight. Lower the bar to mid-chest, keeping elbows at a 45-degree angle. Press up explosively, fully extending arms without locking out. Maintain tight core engagement and controlled movement throughout. Always use a spotter or safety bars for heavy lifts. Proper form and progressive overload are key to strength gains while minimizing injury risk."
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d87fe9795af4fd3aacfca34989257e, type: 3}
+  m_Name: AbWheelSelection
+  m_EditorClassIdentifier: 
+  exerciseName: Ab Wheel
+  exerciseImage: {fileID: -3996581245223759545, guid: 15c12b47427c648b9a88c00bfaa43d4b, type: 3}
+  exerciseDescription: The ab wheel is an advanced core exercise that targets the
+    abs, obliques, and stabilizing muscles. Start on your knees, gripping the wheel
+    handles firmly. Engage your core, keeping a neutral spine, and slowly roll forward,
+    extending your body while maintaining control. Avoid arching your lower back.
+    Roll out as far as you can while maintaining tension, then engage your abs to
+    pull yourself back to the starting position. Start with short ranges and progress
+    as strength improves. Proper control and core engagement are essential to prevent
+    strain and maximize effectiveness.
+  exerciseReward: 10

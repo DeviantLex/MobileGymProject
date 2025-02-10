@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d87fe9795af4fd3aacfca34989257e, type: 3}
+  m_Name: PullUpSelection
+  m_EditorClassIdentifier: 
+  exerciseName: Pull Up
+  exerciseImage: {fileID: 7742450658606916318, guid: 73ef5baa6515f4cd0add5736cedce04a, type: 3}
+  exerciseDescription: The pull-up is a bodyweight exercise that builds upper-body
+    strength, targeting the back, biceps, and core. Grip a pull-up bar with hands
+    slightly wider than shoulder-width, palms facing away. Engage your core and retract
+    your shoulder blades. Pull your chest toward the bar by driving your elbows down,
+    keeping movement controlled. Lower yourself slowly until arms are fully extended.
+    Avoid swinging or using momentum. If full pull-ups are difficult, start with
+    assisted variations or negatives. Consistent practice improves strength, posture,
+    and muscle endurance. Proper form is key to maximizing benefits and preventing
+    injury.
+  exerciseReward: 10

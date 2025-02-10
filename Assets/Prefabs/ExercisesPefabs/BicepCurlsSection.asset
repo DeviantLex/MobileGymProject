@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d87fe9795af4fd3aacfca34989257e, type: 3}
+  m_Name: BicepCurlsSection
+  m_EditorClassIdentifier: 
+  exerciseName: Bicep Curls
+  exerciseImage: {fileID: -8494476006803797944, guid: 22a3faf6e21f349d88142d9741574a84, type: 3}
+  exerciseDescription: The bicep curl is an isolation exercise that strengthens the
+    biceps. Stand with feet hip-width apart, holding dumbbells or a barbell with
+    an underhand grip. Keep your elbows close to your torso and your wrists straight.
+    Curl the weight upward by contracting your biceps, bringing it toward shoulder
+    level without swinging or using momentum. Lower it slowly under control to the
+    starting position. Keep your core engaged and avoid excessive shoulder movement.
+    Proper form ensures maximum muscle activation and reduces injury risk. Start
+    with a manageable weight and focus on controlled, full-range motion for optimal
+    results.
+  exerciseReward: 10

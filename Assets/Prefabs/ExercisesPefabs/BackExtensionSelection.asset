@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d87fe9795af4fd3aacfca34989257e, type: 3}
+  m_Name: BackExtensionSelection
+  m_EditorClassIdentifier: 
+  exerciseName: Back Extension
+  exerciseImage: {fileID: 0}
+  exerciseDescription: The back extension strengthens the lower back, glutes, and
+    hamstrings. Position yourself on a back extension bench with hips just above
+    the pad and feet secured. Cross your arms over your chest or hold a weight for
+    added resistance. Engage your core and slowly lower your torso until you feel
+    a stretch in your lower back. Squeeze your glutes and lift back to the starting
+    position without hyperextending. Keep movements controlled and avoid excessive
+    arching to prevent strain. This exercise improves posture, spinal stability,
+    and lower back strength, making it essential for injury prevention and overall
+    core development.
+  exerciseReward: 10
