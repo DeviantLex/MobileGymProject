@@ -15,7 +15,7 @@ public class ExercisePanelManager : MonoBehaviour
     public Transform exerciseContent;
     public GameObject exerciseButtonPrefab;
     public PlayerLifeStats playerLifeStats;
-    public int ExpRewards = 50;
+    public int ExpReward = 50;
 
     private int exerciseNum = 0;
     private string previousSet = "100 x 15";
@@ -27,7 +27,9 @@ public class ExercisePanelManager : MonoBehaviour
 
         addSetButton?.onClick.AddListener(() => AddSet(exercises.Count > 0 ? exercises[^1] : null));
         deleteExercsiseButton?.onClick.AddListener(RemoveLastExercise);
+        finishButton?.onClick.AddListener(ExpRewards);
         finishButton?.onClick.AddListener(SaveData);
+       
         LoadData();
 
         foreach (Transform child in exerciseContent) {   // Clear existing history to prevent duplicates
@@ -91,6 +93,10 @@ public class ExercisePanelManager : MonoBehaviour
             setData.previousSet = previousSet;
         }
     }
+    void ExpRewards() {
+        playerLifeStats.GainExperience(ExpReward);
+    }
+
     private void AdjustContentPanelSize() {
     LayoutRebuilder.ForceRebuildLayoutImmediate(contentPanel.GetComponent<RectTransform>());
 
@@ -108,12 +114,14 @@ public class ExercisePanelManager : MonoBehaviour
     contentRect.anchoredPosition = new Vector2(contentRect.anchoredPosition.x, 0);
 }
     private void SaveData() {
-    // 🔹 Save workout data
+    
+    
+    // Save workout data
     string json = JsonUtility.ToJson(new ExerciseSaveData(exercises), true);
     File.WriteAllText(saveFilePath, json);
     Debug.Log("Workout data saved!");
 
-    // 🔹 Update history UI
+    // Update history UI
     if (historyManager != null) {
         historyManager.UpdateHistoryUI(exercises);
     } else {
@@ -123,9 +131,7 @@ public class ExercisePanelManager : MonoBehaviour
     // 🔹 Clear saved file so next session starts fresh
     File.Delete(saveFilePath);
     Debug.Log("Previous workout data deleted!");
-    playerLifeStats.GainExperience(ExpRewards);
 
-    // 🔹 Reset workout UI
     ResetWorkout();
 }
     private void LoadData() {

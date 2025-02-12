@@ -24,7 +24,7 @@ public class GymAttendanceGraph : MonoBehaviour
             VisitNum.text = $"{visits}";   
 
             float normalizedHeight = Mathf.Clamp01((float)visits / maxVisits); // Scale height based on visits (normalized by maxVisits)
-            barRect.sizeDelta = new Vector2(barRect.sizeDelta.x, normalizedHeight * 800); // Adjust 200 to desired max height
+            barRect.sizeDelta = new Vector2(barRect.sizeDelta.x, normalizedHeight * 400); // Adjust 200 to desired max height
         }
     }
     public void UpdateGraph(List<int> newAttendance) {  // Call this method when attendance data updates

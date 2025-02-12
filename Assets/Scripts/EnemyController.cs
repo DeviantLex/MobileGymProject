@@ -12,7 +12,6 @@ public class EnemyController : MonoBehaviour
     public int maxEnemyAttackPoints = 10;
     public Slider enemyHealthBar;
     public PlayerLifeStats playerLifeStats;
-    public int ExpRewards = 50;
 
     private bool isDefeated = false;
     public void Initialize(PlayerLifeStats player, int health)

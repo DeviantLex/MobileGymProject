@@ -12,11 +12,12 @@ public class PlayerLifeStats : MonoBehaviour
 {
     public int maxPlayerHealth = 100, maxPlayerMana = 100, maxLevelExp = 100, maxHealthPotions = 10, playerAttackPoints = 10;  
     private bool isDefending = false;
+
     public int currentPlayerHealth, currentPlayerMana, currentPlayerStrength, currentPlayerSpeed, healthPotionCount, currentCoins = 0;
     public int currentLevelExp = 0;
     public int currentPlayerLevel = 0;
     public int skillPoints = 0;
-
+    
     public Slider healthBar, manaBar, expBar;
 
     private string saveFilePath;
@@ -31,7 +32,6 @@ public class PlayerLifeStats : MonoBehaviour
         expBar.maxValue = maxLevelExp;
         currentCoins = 10000;
         currentPlayerLevel = 1;
-
         UpdateUI();
     }
 
@@ -55,6 +55,7 @@ public class PlayerLifeStats : MonoBehaviour
         bar.value = Mathf.Lerp(startValue, targetValue, time / duration);
         yield return null;
     }
+
     bar.value = targetValue; // Ensure it reaches exactly the target value
     }
 
@@ -65,8 +66,7 @@ public class PlayerLifeStats : MonoBehaviour
 
         currentPlayerHealth = Mathf.Clamp(currentPlayerHealth - damage, 0, maxPlayerHealth);
         Debug.Log($"Player took {damage} damage. Current health: {currentPlayerHealth}");
-        UpdateUI();
-        //SavePlayerData(); // Save progress
+        UpdateUI();  
     }
 
     public void PlayerAttack(EnemyController enemy) {
