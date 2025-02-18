@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SwordItem
   m_EditorClassIdentifier: 
   itemName: Sword
-  itemImage: {fileID: 712035800519618848, guid: ec38daadbf7184e89b9dbd942dc4ee19, type: 3}
+  itemImage: {fileID: 3463658362275521134, guid: 68e430aaa6591408781d9ade24518b44, type: 3}
   itemDescription: +5 Points Damage
   itemPrice: 1000

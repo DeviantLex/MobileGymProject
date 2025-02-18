@@ -5,11 +5,10 @@ using System.Collections.Generic;
 public class ExerciseHistoryManager : MonoBehaviour {
     public Transform historyPanelParent;
     public GameObject historyPrefab;
-
-    private GameObject historyPanelInstance; // 🔹 Store a single history panel
+    public ExercisePanelManager exercisePanelManager;
 
     public void UpdateHistoryUI(List<ExerciseData> savedExercises) {
-        Debug.Log("Updating Exercise History UI...");
+        Debug.Log("Adding new exercise history panel...");
 
         // 🔹 Check if historyPrefab is assigned
         if (historyPrefab == null) {
@@ -17,34 +16,33 @@ public class ExerciseHistoryManager : MonoBehaviour {
             return;
         }
 
-        // 🔹 Clear previous panel if it exists to prevent duplicates
-        if (historyPanelInstance != null) {
-            Destroy(historyPanelInstance);
-        }
+        // 🔹 Instantiate a new history panel for each save
+        GameObject newHistoryPanel = Instantiate(historyPrefab, historyPanelParent);
+        newHistoryPanel.SetActive(true);
 
-        // 🔹 Create a single panel to hold all history
-        historyPanelInstance = Instantiate(historyPrefab, historyPanelParent);
-        historyPanelInstance.SetActive(true);
-
-        SetHistoryContent(historyPanelInstance, savedExercises);
+        SetHistoryContent(newHistoryPanel, savedExercises);
     }
 
-    private void SetHistoryContent(GameObject historyPanel, List<ExerciseData> exercises) {
-        TextMeshProUGUI historyExerciseSets = historyPanel.transform.Find("historySets")?.GetComponent<TextMeshProUGUI>();
+   private void SetHistoryContent(GameObject historyPanel, List<ExerciseData> exercises) {
+    TextMeshProUGUI historyExerciseSets = historyPanel.transform.Find("historySets")?.GetComponent<TextMeshProUGUI>();
+    TextMeshProUGUI historyDateText = historyPanel.transform.Find("historyDate")?.GetComponent<TextMeshProUGUI>();
 
-        if (historyExerciseSets) {
-            string setHistory = "";
+    if (historyDateText && exercisePanelManager?.dayText != null) {
+        historyDateText.text = $"<b>{exercisePanelManager.dayText.text}</b>\n\n"; // Adds space after date
+    }
 
-            // 🔹 Iterate over all exercises and append data
-            foreach (var exercise in exercises) {
-                setHistory += $"<b>{exercise.exerciseName}</b>\n"; // 🔹 Bold exercise name
-                foreach (var set in exercise.sets) {
-                    setHistory += $"  • Set {set.setNumber}: {set.weight} lbs x {set.reps} reps\n";
-                }
-                setHistory += "\n"; // 🔹 Add spacing between exercises
+    if (historyExerciseSets) {
+        string setHistory = "";
+
+        foreach (var exercise in exercises) {
+            setHistory += $"<b>{exercise.exerciseName}</b>\n"; 
+            foreach (var set in exercise.sets) {
+                setHistory += $"  • Set {set.setNumber}: {set.weight} lbs x {set.reps} reps\n";
             }
-
-            historyExerciseSets.text = setHistory;
+            setHistory += "\n"; // Extra space between exercises
         }
+
+        historyExerciseSets.text = setHistory;
     }
+}
 }

@@ -8,106 +8,83 @@ public class PlayerData
 {
     public int currentPlayerHealth, currentPlayerMana, currentCoins, currentLevelExp, currentPlayerLevel, currentPlayerStrength, currentPlayerSpeed;
 }
+
 public class PlayerLifeStats : MonoBehaviour
 {
-    public int maxPlayerHealth = 100, maxPlayerMana = 100, maxLevelExp = 100, maxHealthPotions = 10, playerAttackPoints = 10;  
+    public int maxPlayerHealth = 100, maxPlayerMana = 100, maxLevelExp = 100, maxHealthPotions = 10, playerAttackPoints = 10;
     private bool isDefending = false;
 
     public int currentPlayerHealth, currentPlayerMana, currentPlayerStrength, currentPlayerSpeed, healthPotionCount, currentCoins = 0;
-    public int currentLevelExp = 0;
-    public int currentPlayerLevel = 0;
-    public int skillPoints = 0;
-    
-    public Slider healthBar, manaBar, expBar;
+    public int currentLevelExp = 0, currentPlayerLevel = 1, skillPoints = 0;
 
+    public Slider healthBar, manaBar, expBar;
     private string saveFilePath;
 
+    void Awake() {
+        saveFilePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
+        LoadPlayerData();
+    }
     void Start() {
-        saveFilePath = Application.persistentDataPath + "/playerdata.json";
-        LoadPlayerData(); // Load data when the game starts
-
-        // Initialize UI elements
         healthBar.maxValue = maxPlayerHealth;
         manaBar.maxValue = maxPlayerMana;
         expBar.maxValue = maxLevelExp;
-        currentCoins = 10000;
-        currentPlayerLevel = 1;
         UpdateUI();
     }
-
     void Update() {
-        if(currentLevelExp >= maxLevelExp) {
-            currentLevelExp = 0; // Reset XP
+        if (currentLevelExp >= maxLevelExp) {
+            currentLevelExp = 0;
             currentPlayerLevel++;
             skillPoints++;
             OnStatsChanged();
         }
-    }  
-
-    IEnumerator SmoothBarTransition(Slider bar, float targetValue, float duration = 0.5f)
-    {
-    float startValue = bar.value;
-    float time = 0f;
-
-    while (time < duration)
-    {
-        time += Time.deltaTime;
-        bar.value = Mathf.Lerp(startValue, targetValue, time / duration);
-        yield return null;
     }
-
-    bar.value = targetValue; // Ensure it reaches exactly the target value
+    IEnumerator SmoothBarTransition(Slider bar, float targetValue, float duration = 0.5f) {
+        float startValue = bar.value, time = 0f;
+        while (time < duration) {
+            time += Time.deltaTime;
+            bar.value = Mathf.Lerp(startValue, targetValue, time / duration);
+            yield return null;
+        }
+        bar.value = targetValue;
     }
 
     public void TakeDamage(int damage) {
-        if (isDefending) {
-            damage /= 2;
-        }
-
+        if (isDefending) damage /= 2;
         currentPlayerHealth = Mathf.Clamp(currentPlayerHealth - damage, 0, maxPlayerHealth);
         Debug.Log($"Player took {damage} damage. Current health: {currentPlayerHealth}");
-        UpdateUI();  
-    }
-
-    public void PlayerAttack(EnemyController enemy) {
-        enemy.TakeDamage(playerAttackPoints);
-    }
-
-    public void Defend() {
-        isDefending = true;
-    }
-
-    public void Heal() {
-        currentPlayerHealth = Mathf.Clamp(currentPlayerHealth + 20, 0, maxPlayerHealth);
         UpdateUI();
-        //SavePlayerData();
     }
 
-    public void Run() {
-        currentPlayerHealth -= 10;
+    public void PlayerAttack(EnemyController enemy) => enemy.TakeDamage(playerAttackPoints);
+    public void Defend() => isDefending = true;
+    public void Heal() => ModifyHealth(40);
+    public void Run() => ModifyHealth(-10);
+    public void GainCoins(int coinAmount) => ModifyExp(coinAmount);
+
+    void ModifyHealth(int amount) {
+        currentPlayerHealth = Mathf.Clamp(currentPlayerHealth + amount, 0, maxPlayerHealth);
         UpdateUI();
-        SavePlayerData();
+    }
+     public void ModifyCoins(int amount)
+    {
+        currentCoins += amount;
+        OnStatsChanged();  // Update the UI whenever coins change
     }
 
-    public void GainExperience(int exp) {
-        currentLevelExp = Mathf.Clamp(currentLevelExp + exp, 0, maxLevelExp);
-        Debug.Log($"Gained {exp} XP. Total XP: {currentLevelExp}");
+    void ModifyExp(int amount) {
+        currentLevelExp = Mathf.Clamp(currentLevelExp + amount, 0, maxLevelExp);
         UpdateUI();
         SavePlayerData();
     }
-
-    void UpdateUI() {
-    StartCoroutine(SmoothBarTransition(healthBar, currentPlayerHealth));
-    StartCoroutine(SmoothBarTransition(manaBar, currentPlayerMana));
-    StartCoroutine(SmoothBarTransition(expBar, currentLevelExp));
+    public void UpdateUI() {
+        StartCoroutine(SmoothBarTransition(healthBar, currentPlayerHealth));
+        StartCoroutine(SmoothBarTransition(manaBar, currentPlayerMana));
+        StartCoroutine(SmoothBarTransition(expBar, currentLevelExp));
+        OnStatsChanged();
     }
-
     public void OnStatsChanged() {
-        // Assuming PlayerStats is attached to the same GameObject
         var playerStats = GetComponent<PlayerStats>();
-        if (playerStats != null) {
-            playerStats.OnStatsChanged();
-        }
+        playerStats?.OnStatsChanged();
     }
     public void SavePlayerData() {
         PlayerData data = new PlayerData {
@@ -115,48 +92,44 @@ public class PlayerLifeStats : MonoBehaviour
             currentPlayerMana = currentPlayerMana,
             currentCoins = currentCoins,
             currentLevelExp = currentLevelExp,
-            currentPlayerLevel = currentPlayerLevel
+            currentPlayerLevel = currentPlayerLevel,
+            currentPlayerStrength = currentPlayerStrength,
+            currentPlayerSpeed = currentPlayerSpeed
         };
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(saveFilePath, json);
+        File.WriteAllText(saveFilePath, JsonUtility.ToJson(data, true));
         Debug.Log("Game Saved!");
     }
-
     public void LoadPlayerData() {
         if (File.Exists(saveFilePath)) {
-            string json = File.ReadAllText(saveFilePath);
-            PlayerData data = JsonUtility.FromJson<PlayerData>(json);
-
-            //All Values here levelExp, playerLevel, Strength, and Speed need to be updated
-
-            //currentPlayerHealth = data.currentPlayerHealth;
-            currentPlayerHealth =maxPlayerHealth;
+            PlayerData data = JsonUtility.FromJson<PlayerData>(File.ReadAllText(saveFilePath));
+            currentPlayerHealth = maxPlayerHealth;
             currentPlayerMana = data.currentPlayerMana;
             currentCoins = data.currentCoins;
             currentPlayerLevel = 1;
             currentLevelExp = 0;
-            //currentLevelExp = data.currentLevelExp;
-            //currentPlayerLevel = data.currentPlayerLevel;
             currentPlayerStrength = 0;
             currentPlayerSpeed = 0;
-            //currentPlayerStrength = data.currentPlayerStrength;
-            //currentPlayerSpeed = data.currentPlayerSpeed;
-
             Debug.Log("Game Loaded!");
-        }
-        else {
+        } else {
             Debug.Log("No save file found. Starting new game.");
             currentPlayerHealth = maxPlayerHealth;
             currentPlayerMana = maxPlayerMana;
-            currentCoins = 10000;
-            currentLevelExp = 0;
+            currentCoins = 100;
+            currentLevelExp = 1;
             currentPlayerLevel = 1;
             currentPlayerStrength = 0;
             currentPlayerSpeed = 0;
         }
         UpdateUI();
     }
-      public bool OnPlayerDefeat() {
-        return currentPlayerHealth <= 0;
+    public void DeleteSaveFile() {
+        if (File.Exists(saveFilePath)) {
+            File.Delete(saveFilePath);
+            Debug.Log("Save file deleted.");
+        } else {
+            Debug.Log("No save file found.");
+        }
     }
+
+    public bool OnPlayerDefeat() => currentPlayerHealth <= 0;
 }

@@ -29,8 +29,6 @@ public class TurnManager : MonoBehaviour
         SpawnEnemy();
         StartTurn();
     }
-    
-
     void Update() => turnNum.text = $"Turn: {currentTurn}";
 
     void SpawnEnemy()
@@ -112,17 +110,16 @@ public class TurnManager : MonoBehaviour
 
     bool IsGameOver()
     {
-        if (player.OnPlayerDefeat())
-        {
+        if (player.OnPlayerDefeat()) {
             EndGame(false);
             return true;
         }
         return currentEnemyIndex >= enemies.Count;
     }
 
-    void EndGame(bool playerWon)
-    {
+    void EndGame(bool playerWon) {
         EnablePlayerUI(false);
+        player.currentCoins += 100;
         Debug.Log(playerWon ? "You win!" : "You lose.");
     }
 

@@ -8,19 +8,17 @@ public class PlayerStats : MonoBehaviour
     public TextMeshProUGUI playerCoins;
 
     void Start() {
-        if (playerEx || playerCoins != null) {
-            UpdatePlayerStatsDisplay();
-        }
-        else {
-            Debug.LogWarning("UI Text reference is missing!");
+        if (playerEx != null && playerCoins != null) {
+            Update();
         }
     }
-    void UpdatePlayerStatsDisplay() {
-        playerEx.text = $"{playerLifeStats.currentPlayerLevel}";     
-        playerCoins.text = $"{playerLifeStats.currentCoins}";
+    void Update() {
+        if (playerLifeStats != null) {  // Ensure playerLifeStats is assigned
+            playerEx.text = $"{playerLifeStats.currentPlayerLevel}";     
+            playerCoins.text = $"{playerLifeStats.currentCoins}";
+        }
     }
-
     public void OnStatsChanged() {  // Call when stats change in PlayerLifeStats
-        UpdatePlayerStatsDisplay();
+        Update();
     }
 }

@@ -3,169 +3,172 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using System.IO;
+using System;
+using System.Collections;
+using System.Linq;
 
-public class ExercisePanelManager : MonoBehaviour
-{
-    public GameObject setPrefab, exercisePrefab;
-    public Transform contentPanel;
-    public Button addSetButton, deleteExercsiseButton, finishButton;
-    public float setSpacing = 10f, exerciseSpacing;
+public class ExercisePanelManager : MonoBehaviour {
+    [Header("UI References")]
+    public Transform contentPanel, exerciseContent;
+    public GameObject setPrefab, exercisePrefab, exerciseButtonPrefab;
+    public Button addSetButton, deleteExerciseButton, finishButton, addExerciseButton;
+    public TMP_Text dayText, timerText;
+
+    [Header("Dependencies")]
     public ExerciseManager exerciseManager;
     public ExerciseHistoryManager historyManager;
-    public Transform exerciseContent;
-    public GameObject exerciseButtonPrefab;
     public PlayerLifeStats playerLifeStats;
-    public int ExpReward = 50;
 
+    [Header("Settings")]
+    public float setSpacing = 10f, exerciseSpacing = 10f;
+
+    private List<ExerciseData> exercises = new();
+    private string saveFilePath;
     private int exerciseNum = 0;
     private string previousSet = "100 x 15";
-    private List<ExerciseData> exercises = new List<ExerciseData>();
-    private string saveFilePath;
+    private bool isTiming = false;
+    private float elapsedTime = 0f;
 
     void Start() {
         saveFilePath = Path.Combine(Application.persistentDataPath, "exerciseData.json");
 
         addSetButton?.onClick.AddListener(() => AddSet(exercises.Count > 0 ? exercises[^1] : null));
-        deleteExercsiseButton?.onClick.AddListener(RemoveLastExercise);
-        finishButton?.onClick.AddListener(ExpRewards);
+        deleteExerciseButton?.onClick.AddListener(RemoveLastExercise);
         finishButton?.onClick.AddListener(SaveData);
-       
+        addExerciseButton?.onClick.AddListener(StartTimerIfNeeded);
+
         LoadData();
+        UpdateDayText();
+        ClearExerciseContent();
+    }
 
-        foreach (Transform child in exerciseContent) {   // Clear existing history to prevent duplicates
-            Destroy(child.gameObject);
+    private void UpdateDayText() {
+        if (dayText) dayText.text = $"  {DateTime.Now.DayOfWeek}";
+    }
+
+    private void StartTimerIfNeeded() {
+        if (!isTiming) StartCoroutine(TimerCoroutine());
+    }
+
+    private IEnumerator TimerCoroutine() {
+        isTiming = true;
+        while (isTiming) {
+            elapsedTime += Time.deltaTime;
+            UpdateTimerText();
+            yield return null;
         }
     }
+
+    private void UpdateTimerText() {
+        if (timerText) {
+            TimeSpan timeSpan = TimeSpan.FromSeconds(elapsedTime);
+            timerText.text = $"  Time: {timeSpan:hh\\:mm\\:ss}";
+        }
+    }
+
     public void AddExercise() {
-    GameObject newExercise = Instantiate(exercisePrefab, contentPanel);
-    exerciseNum++;
+        string exerciseName = exerciseManager.exerciseSelectedName;
+        if (string.IsNullOrEmpty(exerciseName)) return;
 
-    string exerciseName = exerciseManager.exerciseSelectedName; // Get selected exercise name
-    SetText(newExercise, "ExerciseNameText", exerciseName);
+        GameObject newExercise = Instantiate(exercisePrefab, contentPanel);
+        SetText(newExercise, "ExerciseNameText", exerciseName);
 
-    ExerciseData exerciseData = new ExerciseData(exerciseNum, newExercise, exerciseName);
-    exercises.Add(exerciseData);
+        ExerciseData exerciseData = new(exerciseNum++, newExercise, exerciseName);
+        exercises.Add(exerciseData);
 
-    newExercise.transform.SetAsLastSibling(); // 🔹 Move new exercise to the bottom
-    AdjustContentPanelSize();
-}
+        newExercise.transform.SetAsLastSibling();
+        AdjustContentPanelSize();
+    }
+
     public void AddSet(ExerciseData parentExercise) {
-        if (parentExercise != null) {
-            GameObject newSet = Instantiate(setPrefab, contentPanel);
-            int setNum = parentExercise.sets.Count + 1;
+        if (parentExercise == null) return;
 
-            SetText(newSet, "SetNumberText", $"Set {setNum}");
-            SetText(newSet, "PreviousSetText", $"Previous: {previousSet}");
+        GameObject newSet = Instantiate(setPrefab, contentPanel);
+        int setNum = parentExercise.sets.Count + 1;
 
-            TMP_InputField weightInput = FindInputField(newSet, "WeightInput");
-            TMP_InputField repsInput = FindInputField(newSet, "RepsInput");
+        SetText(newSet, "SetNumberText", $"Set {setNum}");
+        SetText(newSet, "PreviousSetText", $"Previous: {previousSet}");
 
-            if (weightInput && repsInput) {
-                SetData setData = new SetData(setNum, previousSet);
-                parentExercise.sets.Add(setData);
+        TMP_InputField weightInput = FindInputField(newSet, "WeightInput");
+        TMP_InputField repsInput = FindInputField(newSet, "RepsInput");
 
-                weightInput.onValueChanged.AddListener((value) => {
-                    setData.weight = value;
-                    UpdatePreviousSet(setData, value, repsInput.text);
-                });
-                repsInput.onValueChanged.AddListener((value) => {
-                    setData.reps = value;
-                    UpdatePreviousSet(setData, weightInput.text, value);
-                });
-            }
-            AdjustContentPanelSize();
-        }
-        else {
-            Debug.LogWarning("Cannot add a set because no parent exercise exists.");
-        }
+        SetData setData = new(setNum, previousSet);
+        parentExercise.sets.Add(setData);
+
+        weightInput?.onValueChanged.AddListener(value => UpdatePreviousSet(setData, value, repsInput?.text));
+        repsInput?.onValueChanged.AddListener(value => UpdatePreviousSet(setData, weightInput?.text, value));
+
+        AdjustContentPanelSize();
     }
+
     public void RemoveLastExercise() {
-        if (exercises.Count > 0) {
-            ExerciseData lastExercise = exercises[^1];
-            Destroy(lastExercise.exerciseObject);
-            exercises.RemoveAt(exercises.Count - 1);
-            AdjustContentPanelSize();
-        }
+        if (exercises.Count == 0) return;
+
+        Destroy(exercises[^1].exerciseObject);
+        exercises.RemoveAt(exercises.Count - 1);
+        AdjustContentPanelSize();
     }
+
     private void UpdatePreviousSet(SetData setData, string weight, string reps) {
         if (!string.IsNullOrEmpty(weight) && !string.IsNullOrEmpty(reps)) {
             previousSet = $"{weight} x {reps}";
             setData.previousSet = previousSet;
         }
     }
-    void ExpRewards() {
-        playerLifeStats.GainExperience(ExpReward);
-    }
 
     private void AdjustContentPanelSize() {
-    LayoutRebuilder.ForceRebuildLayoutImmediate(contentPanel.GetComponent<RectTransform>());
-
-    RectTransform contentRect = contentPanel.GetComponent<RectTransform>();
-
-    // 🔹 Calculate new height based on exercises and sets
-    float totalHeight = 0;
-    foreach (var exercise in exercises) {
-        totalHeight += exerciseSpacing; // Add exercise spacing
-        totalHeight += exercise.sets.Count * setSpacing; // Add space for sets
+        RectTransform contentRect = contentPanel.GetComponent<RectTransform>();
+        float totalHeight = exercises.Count * exerciseSpacing + exercises.Sum(e => e.sets.Count * setSpacing);
+        contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, totalHeight);
+        contentRect.anchoredPosition = new Vector2(contentRect.anchoredPosition.x, 0);
     }
-    contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, totalHeight); // 🔹 Expand downwards only
 
-    // 🔹 Ensure the content stays anchored at the top while expanding downward
-    contentRect.anchoredPosition = new Vector2(contentRect.anchoredPosition.x, 0);
-}
     private void SaveData() {
-    
-    
-    // Save workout data
-    string json = JsonUtility.ToJson(new ExerciseSaveData(exercises), true);
-    File.WriteAllText(saveFilePath, json);
-    Debug.Log("Workout data saved!");
+        string json = JsonUtility.ToJson(new ExerciseSaveData(exercises), true);
+        File.WriteAllText(saveFilePath, json);
+        historyManager?.UpdateHistoryUI(exercises);
 
-    // Update history UI
-    if (historyManager != null) {
-        historyManager.UpdateHistoryUI(exercises);
-    } else {
-        Debug.LogError("ExerciseHistoryManager is not assigned in ExercisePanelManager!");
+        int totalReward = exercises.Sum(e => {
+        var selection = exerciseManager.GetExerciseSelection(e.exerciseName);
+        return int.TryParse(selection?.exerciseReward, out int exp) ? exp : 0;
+    });
+        Debug.Log("Reward is " + totalReward + " xp.");
+        
+        playerLifeStats.currentLevelExp += totalReward;
+        playerLifeStats.UpdateUI();
+        isTiming = false;
+        File.Delete(saveFilePath);
+        ResetWorkout();
     }
 
-    // 🔹 Clear saved file so next session starts fresh
-    File.Delete(saveFilePath);
-    Debug.Log("Previous workout data deleted!");
-
-    ResetWorkout();
-}
     private void LoadData() {
-    if (File.Exists(saveFilePath)) {
+        if (!File.Exists(saveFilePath)) return;
+
         string json = File.ReadAllText(saveFilePath);
         ExerciseSaveData loadedData = JsonUtility.FromJson<ExerciseSaveData>(json);
-
-        // 🔹 Clear previous exercises and UI before loading new data
-        foreach (Transform child in exerciseContent) {
-            Destroy(child.gameObject);
-        }
-        exercises.Clear();  // Clear the list of stored exercises
+        
+        ClearExerciseContent();
+        exercises.Clear();
 
         foreach (var loadedExercise in loadedData.exercises) {
             AddExercise();
-            exercises[^1].exerciseName = loadedExercise.exerciseName; // 🔹 Restore name
-
-            foreach (var loadedSet in loadedExercise.sets) {
-                AddSet(exercises[^1]);
-            }
+            exercises[^1].exerciseName = loadedExercise.exerciseName;
+            foreach (var _ in loadedExercise.sets) AddSet(exercises[^1]);
         }
         AdjustContentPanelSize();
-    } 
-}
-    private void ResetWorkout() {
-    Debug.Log("Resetting workout session...");
+    }
 
-    foreach (Transform child in exerciseContent) {  // Destroy all exercise objects in the UI
-            Destroy(child.gameObject);
-        }
-    exercises.Clear(); 
-    exerciseNum = 0; 
-    AdjustContentPanelSize(); 
-}
+    private void ResetWorkout() {
+        ClearExerciseContent();
+        exercises.Clear();
+        exerciseNum = 0;
+        AdjustContentPanelSize();
+    }
+
+    private void ClearExerciseContent() {
+        foreach (Transform child in exerciseContent) Destroy(child.gameObject);
+    }
+
     private void SetText(GameObject obj, string childName, string text) {
         TMP_Text tmpText = obj.transform.Find(childName)?.GetComponent<TMP_Text>();
         if (tmpText) tmpText.text = text;
@@ -175,10 +178,11 @@ public class ExercisePanelManager : MonoBehaviour
         return obj.transform.Find(childName)?.GetComponent<TMP_InputField>();
     }
 }
-[System.Serializable] // Update ExerciseData Class
+
+[System.Serializable]
 public class ExerciseData {
     public int exerciseNumber;
-    public string exerciseName; // Store name explicitly
+    public string exerciseName;
     public GameObject exerciseObject;
     public List<SetData> sets = new();
 
@@ -192,13 +196,11 @@ public class ExerciseData {
 [System.Serializable]
 public class SetData {
     public int setNumber;
-    public string previousSet, weight, reps;
+    public string previousSet, weight = "", reps = "";
 
     public SetData(int number, string prev) {
         setNumber = number;
         previousSet = prev;
-        weight = "";
-        reps = "";
     }
 }
 

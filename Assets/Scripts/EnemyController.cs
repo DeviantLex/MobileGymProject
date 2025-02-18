@@ -12,6 +12,7 @@ public class EnemyController : MonoBehaviour
     public int maxEnemyAttackPoints = 10;
     public Slider enemyHealthBar;
     public PlayerLifeStats playerLifeStats;
+   
 
     private bool isDefeated = false;
     public void Initialize(PlayerLifeStats player, int health)
@@ -31,10 +32,6 @@ public class EnemyController : MonoBehaviour
      if (playerLifeStats == null)
      {
         playerLifeStats = FindFirstObjectByType<PlayerLifeStats>();
-        if (playerLifeStats == null)
-        {
-            Debug.LogError("PlayerLifeStats not found!");
-        }
 
         currentEnemyHealth = Random.Range(minEnemyHealth, maxEnemyHealth + 1);
         enemyHealthBar.maxValue = currentEnemyHealth; 

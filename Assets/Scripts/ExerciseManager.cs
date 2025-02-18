@@ -1,84 +1,95 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class ExerciseManager : MonoBehaviour
 {
-    public GameObject panelPrefab; // Prefab for the exercise button
-    public Transform panelParent; // Parent transform for buttons
-    public ExerciseSelection[] exerciseSelection; // Array of exercise dataß
-    public GameObject descriptionPanel; // Reference to the separate description panel
-    public PanelManager panelManager; // Reference to PanelManager
-    public TextMeshProUGUI descriptionText; // Text component in the description panel
+    [Header("UI References")]
+    public GameObject panelPrefab;
+    public Transform panelParent;
+    public GameObject descriptionPanel;
+    public TextMeshProUGUI descriptionText;
     public Image descriptionImage;
-    private Button exerciseButton;
+
+    [Header("Dependencies")]
+    public PanelManager panelManager;
     public ExercisePanelManager exercisePanelManager;
-    public string exerciseSelectedName;
-    public int exercisePanelIndex;
-    public int descriptionPanelIndex; // Index of the description panel in PanelManager
+
+    [Header("Data")]
+    public ExerciseSelection[] exerciseSelection;
+    public List<ExerciseSelection> availableExercises = new();
     
+    public string exerciseSelectedName;
+
     void Start() {
         if (!panelPrefab || !panelParent || !descriptionPanel || !descriptionText) {
-            Debug.LogError("Missing exercise references! Assign them in the Inspector.");
+            Debug.LogError("Missing UI references! Assign them in the Inspector.");
             return;
         }
         GenerateExerciseButtons();
     }
+
     void GenerateExerciseButtons() {
         if (exerciseSelection == null || exerciseSelection.Length == 0) {
             Debug.LogWarning("Exercise selection is empty!");
             return;
         }
+
         foreach (var exercise in exerciseSelection) {
             if (exercise == null) continue;
-
             GameObject newButton = Instantiate(panelPrefab, panelParent);
-            SetButtonContent(newButton, exercise);
+            SetupExerciseButton(newButton, exercise);
         }
     }
-    public void SetButtonContent(GameObject buttonObj, ExerciseSelection exercise) {
-    // Set button image
-    Image exerciseImage = buttonObj.transform.Find("ExerciseImage")?.GetComponent<Image>();
-    if (exerciseImage != null) exerciseImage.sprite = exercise.exerciseImage;
 
-    // Set button text
-    TextMeshProUGUI exerciseNameText = buttonObj.transform.Find("ExerciseName")?.GetComponent<TextMeshProUGUI>();
-    if (exerciseNameText != null) exerciseNameText.text = exercise.exerciseName;
+    void SetupExerciseButton(GameObject buttonObj, ExerciseSelection exercise) {
+        // Set image & text
+        SetUIElement(buttonObj, "ExerciseImage", exercise.exerciseImage);
+        SetUIElement(buttonObj, "ExerciseName", exercise.exerciseName);
+        SetUIElement(buttonObj, "ExerciseReward", exercise.exerciseReward);
 
-    TextMeshProUGUI exerciseRewardText = buttonObj.transform.Find("ExerciseReward")?.GetComponent<TextMeshProUGUI>();
-    if (exerciseRewardText != null) exerciseRewardText.text = exercise.exerciseReward;
+        // Info button - shows description
+        Button infoButton = GetButton(buttonObj, "InfoButton");
+        infoButton?.onClick.AddListener(() => ShowDescription(exercise));
 
-    Button infoButton = buttonObj.transform.Find("InfoButton")?.GetComponent<Button>(); // Displays exercise info 
-    if (infoButton != null) {
-        infoButton.onClick.AddListener(() => ShowDescription(exercise.exerciseDescription, exercise.exerciseImage));
+        // Add Exercise button
+        Button addButton = GetButton(buttonObj, "AddExerciseButton");
+        addButton?.onClick.AddListener(() => AddExercise(exercise));
     }
-    exerciseButton = buttonObj.transform.Find("AddExerciseButton")?.GetComponent<Button>(); // Modify ExerciseButton to both set name and add exercise
-    if (exerciseButton != null) {
-        exerciseButton.onClick.AddListener(() => {
-            if (!string.IsNullOrEmpty(exercise.exerciseName)) {
-                SetExerciseName(exercise.exerciseName);
-            } 
-            if (exercisePanelManager != null) {
-                exercisePanelManager.AddExercise();
-                panelManager.OpenPanel(exercisePanelIndex);
-            }          
-        });
-    }
-}
-    void ShowDescription(string description, Sprite exerciseSprite) {
-        descriptionText.text = description;
-        descriptionImage.sprite = exerciseSprite; //Update the image
-        panelManager.OpenPanel(descriptionPanelIndex);
-    }
-    public void SetExerciseName(string exerciseName) {
-    exerciseSelectedName = exerciseName; // Store the selected name
-    TextMeshProUGUI selectedExerciseNameText = exercisePanelManager.exercisePrefab.transform.Find("ExercisePrefab")?.GetComponent<TextMeshProUGUI>();
 
-    if (selectedExerciseNameText != null) {
-        selectedExerciseNameText.text = exerciseSelectedName;
-        Debug.Log("Current Exercise Set To: " + exerciseSelectedName);
-    } else {
-        //Debug.LogWarning("Exercise button text not found!");
+    void ShowDescription(ExerciseSelection exercise) {
+        descriptionText.text = exercise.exerciseDescription;
+        descriptionImage.sprite = exercise.exerciseImage;
+        panelManager.OpenPanel(3); // Assuming 2 is the description panel index
+        panelManager.ClosePanel(1); // Assuming 0 is the main exercise selection panel
     }
-}
+
+    void AddExercise(ExerciseSelection exercise) {
+        exerciseSelectedName = exercise.exerciseName;
+        if (exercisePanelManager) {
+            exercisePanelManager.AddExercise();
+        }
+        panelManager.OpenPanel(2); // Assuming 1 is the exercise detail panel
+        panelManager.ClosePanel(1);
+    }
+
+    public ExerciseSelection GetExerciseSelection(string name) {
+        return availableExercises.Find(e => e.exerciseName == name);
+    }
+
+    // Utility Methods
+    void SetUIElement(GameObject obj, string childName, string text) {
+        TextMeshProUGUI tmpText = obj.transform.Find(childName)?.GetComponent<TextMeshProUGUI>();
+        if (tmpText) tmpText.text = text;
+    }
+
+    void SetUIElement(GameObject obj, string childName, Sprite sprite) {
+        Image image = obj.transform.Find(childName)?.GetComponent<Image>();
+        if (image) image.sprite = sprite;
+    }
+
+    Button GetButton(GameObject obj, string childName) {
+        return obj.transform.Find(childName)?.GetComponent<Button>();
+    }
 }

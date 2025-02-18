@@ -26,7 +26,7 @@ public class LoginTracker : MonoBehaviour
     private void UpdateGraph() {
         for (int i = 0; i < 7; i++) {
             // Update panel height based on login count
-            float height = (loginCounts[i] / (float)GetMaxLoginCount()) * maxHeight;
+            float height = loginCounts[i] / (float)GetMaxLoginCount() * maxHeight;
             dayPanels[i].sizeDelta = new Vector2(dayPanels[i].sizeDelta.x, Mathf.Max(height, 10)); // Ensure minimum height
 
             // Update label text to show login count

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4b9409cc49a4b1c8e8f7580e333667, type: 3}
+  m_Name: BeholderEnemy
+  m_EditorClassIdentifier: 
+  MonsterName: Beholder
+  MonsterImage: {fileID: 1038975137056941338, guid: 07d94870dcfdd41fc8af97419ebd6814, type: 3}
+  MonsterDescription: A terrifying floating orb covered in eyestalks, each capable
+    of firing deadly magical rays. The central eye negates magic, while the other
+    stalks can unleash effects like disintegration, petrification, or sleep. Beholders
+    are highly intelligent, paranoid, and often believe they are superior to all
+    other beings.
+  MonsterReward: 10

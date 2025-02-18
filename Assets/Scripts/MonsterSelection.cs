@@ -5,5 +5,6 @@ public class MonsterSelection : ScriptableObject
 {
     public string MonsterName;
     public Sprite MonsterImage;
+    public string MonsterDescription;
     public string MonsterReward;
 }
