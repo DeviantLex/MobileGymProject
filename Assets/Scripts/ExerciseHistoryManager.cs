@@ -8,15 +8,7 @@ public class ExerciseHistoryManager : MonoBehaviour {
     public ExercisePanelManager exercisePanelManager;
 
     public void UpdateHistoryUI(List<ExerciseData> savedExercises) {
-        Debug.Log("Adding new exercise history panel...");
 
-        // 🔹 Check if historyPrefab is assigned
-        if (historyPrefab == null) {
-            Debug.LogError("History Prefab is not assigned in ExerciseHistoryManager!");
-            return;
-        }
-
-        // 🔹 Instantiate a new history panel for each save
         GameObject newHistoryPanel = Instantiate(historyPrefab, historyPanelParent);
         newHistoryPanel.SetActive(true);
 
@@ -39,7 +31,7 @@ public class ExerciseHistoryManager : MonoBehaviour {
             foreach (var set in exercise.sets) {
                 setHistory += $"  • Set {set.setNumber}: {set.weight} lbs x {set.reps} reps\n";
             }
-            setHistory += "\n"; // Extra space between exercises
+            setHistory += "\n"; 
         }
 
         historyExerciseSets.text = setHistory;

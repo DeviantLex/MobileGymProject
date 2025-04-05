@@ -9,6 +9,8 @@ public class ShopManager : MonoBehaviour
     public ShopItem[] shopItems;  // Array of ShopItem data
     public PlayerLifeStats playerLifeStats; 
     public PlayerStats playerStats;
+    public bool itemPurchased = false;
+    public DailyChallengeManager dailyChallengeManager;
 
     void Start()
     {
@@ -42,30 +44,40 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    void PurchaseItem(ShopItem item, Button purchaseButton)
+    public void PurchaseItem(ShopItem item, Button purchaseButton)
     {
-        if(item.itemName == "Health Potion") {
-            if(playerLifeStats.healthPotionCount >= 10) 
+        // Ensure purchasing conditions are met
+        if (item.itemName == "Health Potion" && playerLifeStats.healthPotionCount >= 10)
         {
-            Debug.Log("You have reacher potion Limit");
+            Debug.Log("You have reached the potion limit!");
             purchaseButton.interactable = false;
             return;
         }
-    }
 
-
-        // Implement purchasing logic here
-        if(playerLifeStats.currentCoins >= item.itemPrice) {
+        if (playerLifeStats.currentCoins >= item.itemPrice)
+        {
+            // Deduct coins
             playerLifeStats.currentCoins -= item.itemPrice;
-            
-            if(item.itemName == "Health Potion") {
+
+            // Handle item-specific logic
+            if (item.itemName == "Health Potion")
+            {
                 playerLifeStats.healthPotionCount++;
             }
-            playerStats.OnStatsChanged(); 
-            Debug.Log($"Purchased: {item.itemName} for {item.itemPrice} currency! Remaining: { playerLifeStats.currentCoins}");
+
+            playerStats.OnStatsChanged(); // Update stats
+            Debug.Log($"Purchased: {item.itemName} for {item.itemPrice} currency! Remaining: {playerLifeStats.currentCoins}");
+
+            // ✅ Mark the purchase and update the challenge system
+            itemPurchased = true;
+            dailyChallengeManager.CheckChallenges(); // 🔹 Now this will trigger properly!
+
+            // Disable the purchase button to prevent re-buying
+            purchaseButton.interactable = false;
         }
-        else{ 
-             Debug.Log($"You cannot purchase that item.");
+        else
+        {
+            Debug.Log("You cannot purchase that item.");
         }
     }
 }

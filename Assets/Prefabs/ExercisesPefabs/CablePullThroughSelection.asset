@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   exerciseName: Cable Pull Through
   exerciseImage: {fileID: 0}
-  exerciseDescription: 
+  exerciseDescription: A posterior chain exercise where you pull a cable handle between
+    your legs from back to front, engaging your glutes and hamstrings.
   exerciseReward: 10

@@ -11,27 +11,53 @@ public class DungeonGenerator : MonoBehaviour
     public GameObject panelPrefab;
     public GridLayoutGroup gridLayout;
     public PanelManager panelManager; // ✅ PanelManager reference
-
+    public PlayerLifeStats playerLifeStats;
     private DungeonCell[,] grid;
     private List<RectInt> rooms = new List<RectInt>();
     private Vector2Int playerPosition;
     private HashSet<Vector2Int> enemyPositions = new();
     private HashSet<Vector2Int> rewardPositions = new();
+    private Vector2Int exitPosition;
+    public bool exitSpawned = false; // Track if exit has been spawned
+    public Button exitButton;
 
     public int rewardPanelIndex;
     public int enemyRoomIndex;
     public int dungeonRoomIndex;
+    public Button dungeonButton; // Reference to the button
 
     public int numEnemies = 3;
     public int numRewards = 2;
 
-    void Start() {
+    void Start() {        
+        if (dungeonButton != null) {
+            dungeonButton.onClick.AddListener(GenerateNewDungeon);
+        } 
+    }
+
+    public void GenerateNewDungeon() {
+        ClearDungeon();
+        GenerateDungeon();
+    }
+
+      void GenerateDungeon() {
         GenerateGrid();
         GenerateRooms();
         ConnectRooms();
         PlacePlayer();
         PlaceEnemiesAndRewards();
         VisualizeDungeon();
+    }
+     void ClearDungeon() {
+        foreach (Transform child in gridLayout.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        rooms.Clear();
+        enemyPositions.Clear();
+        rewardPositions.Clear();
+        exitSpawned = false;
     }
 
     void GenerateGrid()
@@ -172,16 +198,60 @@ public class DungeonGenerator : MonoBehaviour
             {
                 panelManager.OpenPanel(enemyRoomIndex); 
                 panelManager.ClosePanel(dungeonRoomIndex); 
+                //enemyPositions.Remove(newPosition); // ✅ Remove enemy after activation
+            
+            TurnManager turnManager = FindFirstObjectByType<TurnManager>();
+            
+            if (turnManager != null) {
+                turnManager.ResetEnemies(); // Ensure new enemies are spawned
+            }
+            enemyPositions.Remove(newPosition); // ✅ Removes the enemy tile after an encounter
             }
             else if (rewardPositions.Contains(newPosition))
             {
                 panelManager.OpenPanel(rewardPanelIndex); 
+                playerLifeStats.currentCoins += 250;
+                rewardPositions.Remove(newPosition); // ✅ Remove reward after activation
                 //panelManager.ClosePanel(dungeonRoomIndex); 
             }
+            if (!exitSpawned && enemyPositions.Count == 0 && rewardPositions.Count == 0) {
+                SpawnExit();
+            }
 
+            if (exitSpawned && newPosition == exitPosition)  // Check if player reaches exit
+            {
+                Debug.Log("Dungeon Cleared! You can now exit.");
+                panelManager.OpenPanel(17); // Example: Open a "Dungeon Cleared" panel
+            }
             UpdatePlayerVisual();
         }
     }
+
+    void SpawnExit() {
+        List<Vector2Int> availablePositions = new();
+
+        foreach (var room in rooms) {
+            for (int y = room.y; y < room.yMax; y++) {
+                for (int x = room.x; x < room.xMax; x++)
+                {
+                    Vector2Int pos = new(x, y);
+                    if (pos != playerPosition && !enemyPositions.Contains(pos) && !rewardPositions.Contains(pos))
+                    {
+                        availablePositions.Add(pos);
+                    }
+                }
+            }
+        }
+
+        if (availablePositions.Count > 0)
+        {
+            exitPosition = availablePositions[Random.Range(0, availablePositions.Count)];
+            exitSpawned = true;
+            Debug.Log($"Exit spawned at {exitPosition}");
+            UpdatePlayerVisual();
+        }
+    }
+    
 
     void UpdatePlayerVisual() {
         for (int y = 0; y < gridHeight; y++)  {
@@ -190,24 +260,22 @@ public class DungeonGenerator : MonoBehaviour
                 Vector2Int currentPos = new Vector2Int(x, y);
                 Image panelImage = grid[x, y].panel.GetComponent<Image>();
 
-                if (currentPos == playerPosition)
-                {
+                if (currentPos == playerPosition) {
                     panelImage.color = Color.green; // Player
                 }
-                else if (enemyPositions.Contains(currentPos))
-                {
+                else if (enemyPositions.Contains(currentPos)) {
                     panelImage.color = Color.red; // Enemy
                 }
-                else if (rewardPositions.Contains(currentPos))
-                {
+                else if (rewardPositions.Contains(currentPos)) {
                     panelImage.color = Color.yellow; // Reward
                 }
-                else if (grid[x, y].isRoom)
-                {
+                 else if (exitSpawned && currentPos == exitPosition) {
+                panelImage.color = new Color(1f, 0.5f, 0f); // Orange Exit Tile
+                }
+                else if (grid[x, y].isRoom) {
                     panelImage.color = Color.white; // Normal rooms
                 }
-                else
-                {
+                else {
                     panelImage.color = Color.black; // Walls
                 }
             }

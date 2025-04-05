@@ -16,6 +16,10 @@ public class PanelManager : MonoBehaviour
 
     void Start()
     {
+      
+    Application.targetFrameRate = 60; // Force 60 FPS
+    QualitySettings.vSyncCount = 0;   // Disable VSync to avoid conflicts
+
         // Initialize panel states
         for (int i = 0; i < panels.Length; i++)
         {

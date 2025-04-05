@@ -12,20 +12,24 @@ public class EnemyController : MonoBehaviour
     public int maxEnemyAttackPoints = 10;
     public Slider enemyHealthBar;
     public PlayerLifeStats playerLifeStats;
-   
-
     private bool isDefeated = false;
+    public enum Element {Neutral, Fire, Water, Earth, Air } //Creates a list of Elements
+    
+    [Header("Elemental Attributes")]
+    [SerializeField] private Element weakness = Element.Fire;  // Default weakness and strengths, and can be changed
+    [SerializeField] private Element resistance = Element.Water; 
+    
     public void Initialize(PlayerLifeStats player, int health)
-{
-    this.playerLifeStats = player;
-    this.currentEnemyHealth = health;
-
-    if (enemyHealthBar != null)
     {
-        enemyHealthBar.maxValue = health;
-        enemyHealthBar.value = health;
+        this.playerLifeStats = player;
+        this.currentEnemyHealth = health;
+
+        if (enemyHealthBar != null)
+        {
+            enemyHealthBar.maxValue = health;
+            enemyHealthBar.value = health;
+        }
     }
-}
 
     void Start()
     {
@@ -41,15 +45,23 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Element attackElement)
     {
         if (isDefeated) return;
+        float damageMultiplier = 1f; //Default Damage or changes damange based on weaknesses and strengths
 
-        currentEnemyHealth -= damage;
+        if(attackElement == weakness) {
+            damageMultiplier = 1.5f;
+        }
+        else if(attackElement == resistance) { 
+            damageMultiplier = 0.5f;
+        }
+        int finalDamage = Mathf.RoundToInt(damage *  damageMultiplier);
+        currentEnemyHealth -= finalDamage;
         currentEnemyHealth = Mathf.Clamp(currentEnemyHealth, 0, maxEnemyHealth);
         enemyHealthBar.value = currentEnemyHealth;
 
-        Debug.Log($"Enemy took {damage} damage. Current health: {currentEnemyHealth}");
+        Debug.Log($"Enemy took {finalDamage} damage (Element: {attackElement}). Current health: {currentEnemyHealth}");
 
         if (currentEnemyHealth <= 0 && !isDefeated)
         {
@@ -79,4 +91,4 @@ public class EnemyController : MonoBehaviour
         }
         return false;
     }
-}
+} 

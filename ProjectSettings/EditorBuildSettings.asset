@@ -9,7 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/GymScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: c876ed9b6243145bf9c9a3305831f21d, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: bdaeaab0fe6184e829a6c6672fd1380d, type: 2}
+    com.unity.adaptiveperformance.samsung.android.provider_settings: {fileID: 11400000, guid: cfd6e3538222b46eea349cd455936cde, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 73b9925cde7e24df796ac851565141f5, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -19,6 +19,8 @@ public class PlayerLifeStats : MonoBehaviour
 
     public Slider healthBar, manaBar, expBar;
     private string saveFilePath;
+    
+    
 
     void Awake() {
         saveFilePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
@@ -55,7 +57,7 @@ public class PlayerLifeStats : MonoBehaviour
         UpdateUI();
     }
 
-    public void PlayerAttack(EnemyController enemy) => enemy.TakeDamage(playerAttackPoints);
+    public void PlayerAttack(EnemyController enemy, EnemyController.Element attackElement) => enemy.TakeDamage(playerAttackPoints, attackElement);
     public void Defend() => isDefending = true;
     public void Heal() => ModifyHealth(40);
     public void Run() => ModifyHealth(-10);

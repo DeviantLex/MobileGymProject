@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   exerciseName: Cable Kickback
   exerciseImage: {fileID: 0}
-  exerciseDescription: 
+  exerciseDescription: A glute-focused movement where you attach a cable to your
+    ankle and kick your leg back while keeping your torso stable.
   exerciseReward: 10

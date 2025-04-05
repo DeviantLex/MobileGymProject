@@ -6,122 +6,176 @@ using System.Collections.Generic;
 public class TurnManager : MonoBehaviour
 {
     public PlayerLifeStats player;
-    public Transform enemySpawnPoint;
-    public List<GameObject> enemyPrefabs; 
+    public Transform enemyContainer; // Parent object for organizing enemies
+    public List<GameObject> enemyPrefabs;
     public TextMeshProUGUI turnNum;
-    
     public Button attackButton, defendButton, healButton, runButton;
-    
-    private List<GameObject> enemies = new();
+    public Button fireButton, waterButton, earthButton, airButton;
+    public CanvasGroup playerUI;
+    public PanelManager panelManager;
+    public int dungeonMapIndex;
+    public int fightIndex;
+
+    private EnemyController.Element selectedElement = EnemyController.Element.Neutral;
+    private List<EnemyController> enemies = new();
     private int currentTurn = 1, currentEnemyIndex = 0;
     private bool isPlayerTurn = true;
     public int numberOfEnemies = 3, runDamage = 10;
-    public float enemySpreadDistance = 50f;
-
+    private EnemyController currentEnemy;
 
     void Start()
     {
-        attackButton.onClick.AddListener(() => PlayerAction(() => player.PlayerAttack(GetCurrentEnemy())));
+        attackButton.onClick.AddListener(() => PlayerAction(() => player.PlayerAttack(GetCurrentEnemy(), selectedElement)));
         defendButton.onClick.AddListener(() => PlayerAction(player.Defend));
         healButton.onClick.AddListener(() => PlayerAction(player.Heal));
         runButton.onClick.AddListener(RunAway);
 
-        SpawnEnemy();
+        fireButton.onClick.AddListener(() => SetAttackElement(EnemyController.Element.Fire));
+        waterButton.onClick.AddListener(() => SetAttackElement(EnemyController.Element.Water));
+        earthButton.onClick.AddListener(() => SetAttackElement(EnemyController.Element.Earth));
+        airButton.onClick.AddListener(() => SetAttackElement(EnemyController.Element.Air));
+
+        SpawnNextEnemy(); // Spawn the first enemy
         StartTurn();
     }
+
     void Update() => turnNum.text = $"Turn: {currentTurn}";
 
-    void SpawnEnemy()
+    private void SetAttackElement(EnemyController.Element element)
     {
-        if (currentEnemyIndex >= numberOfEnemies) return;
+        selectedElement = element;
+        Debug.Log($"Selected attack element: {selectedElement}");
+    }
 
-        GameObject enemyObj = Instantiate(enemyPrefabs[Random.Range(0, enemyPrefabs.Count)], enemySpawnPoint.position, Quaternion.identity, enemySpawnPoint);
-        enemyObj.transform.localPosition = new Vector3(currentEnemyIndex * enemySpreadDistance, 0, 0);
-        enemies.Add(enemyObj);
+    private void SpawnNextEnemy()
+    {
+        if (currentEnemyIndex >= numberOfEnemies) // End game if all enemies are defeated
+        {
+            EndGame(true);
+            return;
+        }
+
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy.gameObject); // Remove previous enemy
+        }
+
+        GameObject enemyObj = Instantiate(
+            enemyPrefabs[Random.Range(0, enemyPrefabs.Count)],
+            enemyContainer // Parent to the enemy container
+        );
+
+        enemyObj.transform.SetParent(enemyContainer, false); // Ensure correct UI positioning
+
+        RectTransform rectTransform = enemyObj.GetComponent<RectTransform>();
+        if (rectTransform != null)
+        {
+            rectTransform.anchoredPosition = Vector2.zero; // Center inside the UI container
+        }
+        else
+        {
+            enemyObj.transform.localPosition = Vector3.zero; // Adjust for world-space objects
+        }
 
         if (enemyObj.TryGetComponent(out EnemyController enemy))
         {
-            enemy.Initialize(player, Random.Range(50, 100));
-            enemy.OnEnemyDefeated += HandleEnemyDefeat;
+            currentEnemy = enemy;
+            currentEnemy.Initialize(player, Random.Range(50, 100));
+            currentEnemy.OnEnemyDefeated += HandleEnemyDefeat;
+            enemies.Add(currentEnemy);
         }
+
+        Debug.Log($"Spawned enemy {currentEnemyIndex + 1}/{numberOfEnemies} inside {enemyContainer.name}");
     }
 
-    void HandleEnemyDefeat(EnemyController defeatedEnemy)
+    private void HandleEnemyDefeat(EnemyController defeatedEnemy)
     {
+        enemies.Remove(defeatedEnemy);
         currentEnemyIndex++;
-        if (currentEnemyIndex < numberOfEnemies)
-            SpawnEnemy();
-        else
-            EndGame(true);
+
+        Destroy(defeatedEnemy.gameObject); // Remove defeated enemy
+        SpawnNextEnemy(); // Spawn the next one
     }
 
-    void StartTurn()
+    private void StartTurn()
     {
         if (IsGameOver()) return;
-        EnablePlayerUI(isPlayerTurn);
+        TogglePlayerUI(isPlayerTurn);
         if (!isPlayerTurn) EnemyTurn();
     }
 
-    void PlayerAction(System.Action action)
+    private void PlayerAction(System.Action action)
     {
         action.Invoke();
         EndPlayerTurn();
     }
 
-    void EndPlayerTurn()
+    private void EndPlayerTurn()
     {
         isPlayerTurn = false;
         StartTurn();
     }
 
-    void EnemyTurn()
+    private void EnemyTurn()
     {
-        GetCurrentEnemy()?.EnemyAttack(player);
-        if (GetCurrentEnemy()?.OnEnemyDefeat() == true)
+        EnemyController enemy = GetCurrentEnemy();
+        if (enemy != null)
         {
-            HandleEnemyDefeat(GetCurrentEnemy());
-            return;
+            enemy.EnemyAttack(player);
+            if (enemy.currentEnemyHealth <= 0)
+            {
+                HandleEnemyDefeat(enemy);
+            }
         }
-
         NextTurn();
     }
 
-    void RunAway()
+    private void RunAway()
     {
         player.TakeDamage(runDamage);
         Debug.Log($"Player took {runDamage} damage while running away.");
-        EnablePlayerUI(false);
+        EndGame(false);
     }
 
-    void EnablePlayerUI(bool enable)
-    {
-        attackButton.gameObject.SetActive(enable);
-        defendButton.gameObject.SetActive(enable);
-        healButton.gameObject.SetActive(enable);
-        runButton.gameObject.SetActive(enable);
-    }
+    private void TogglePlayerUI(bool enable) => playerUI.alpha = enable ? 1 : 0;
 
-    void NextTurn()
+    private void NextTurn()
     {
         isPlayerTurn = true;
         currentTurn++;
         StartTurn();
     }
 
-    bool IsGameOver()
+    private bool IsGameOver()
     {
-        if (player.OnPlayerDefeat()) {
+        if (player.OnPlayerDefeat())
+        {
             EndGame(false);
             return true;
         }
-        return currentEnemyIndex >= enemies.Count;
+        return currentEnemyIndex >= numberOfEnemies;
     }
 
-    void EndGame(bool playerWon) {
-        EnablePlayerUI(false);
-        player.currentCoins += 100;
+    private void EndGame(bool playerWon)
+    {
+        TogglePlayerUI(false);
+        if (playerWon) player.currentCoins += 100;
+        if (playerWon) panelManager.OpenPanel(dungeonMapIndex); 
+        if (playerWon) panelManager.ClosePanel(fightIndex);
+
         Debug.Log(playerWon ? "You win!" : "You lose.");
     }
 
-    EnemyController GetCurrentEnemy() => (currentEnemyIndex < enemies.Count) ? enemies[currentEnemyIndex].GetComponent<EnemyController>() : null;
+    public void ResetEnemies()
+    {
+        currentEnemyIndex = 0; // Reset enemy index
+        enemies.Clear(); // Clear existing enemy list
+        numberOfEnemies = Random.Range(2, 5); // Randomize the number of enemies per fight
+        SpawnNextEnemy(); // Start a new fight
+        currentTurn = 1; // Reset turn count
+        isPlayerTurn = true;
+        StartTurn(); // Restart turn cycle
+    }
+
+    private EnemyController GetCurrentEnemy() => currentEnemy;
 }
